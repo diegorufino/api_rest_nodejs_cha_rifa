@@ -14,8 +14,10 @@ router.get('/', (req, res, next) => {
                     sorteios: result.map(s => {
                         return {
                             id_sorteio: s.id_sorteio,
-                            cod_sorteio: s.cod_sorteio,
                             tamanho: s.tamanho,
+                            numero_vencedor: s.numero_vencedor,
+                            data_sorteio: s.data_sorteio,
+                            criado: s.criado,
                             request: {
                                 tipo: 'GET',
                                 descricao: 'Retorna os detalhes de um sorteio específico',
@@ -36,8 +38,8 @@ router.post('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'INSERT INTO sorteios (cod_sorteio, tamanho, numero_vencedor, data_sorteio) VALUES (?,?,?,?)',
-            [req.body.cod_sorteio, req.body.tamanho, req.body.numero_vencedor, req.data_sorteio],
+            'INSERT INTO sorteios (tamanho, numero_vencedor, data_sorteio) VALUES (?,?,?)',
+            [req.body.tamanho, req.body.numero_vencedor, req.data_sorteio],
             (error, resultado, field) => {
                 //para liberar a conexao, se nao ela vai continuar na fila e travar outros acessos
                 conn.release();
@@ -47,7 +49,6 @@ router.post('/', (req, res, next) => {
                     mensagem: 'Sorteio inserido com sucesso',
                     sorteioCriado: {
                         id_sorteio: resultado.id_sorteio,
-                        cod_sorteio: req.body.cod_sorteio,
                         tamanho: req.body.tamanho,
                         numero_vencedor: req.body.numero_vencedor,
                         data_sorteio: req.body.data_sorteio,
@@ -84,10 +85,10 @@ router.get('/:id_sorteio', (req, res, next) => {
                     
                     sorteios: {
                         id_sorteio: result[0].id_sorteio,
-                        cod_sorteio: result[0].cod_sorteio,
                         tamanho: result[0].tamanho,
                         numero_vencedor: result[0].numero_vencedor,
                         data_sorteio: result[0].data_sorteio,
+                        criado: result[0].criado,
                         request: {
                             tipo: 'POST',
                             descricao: 'Retorna um sorteios',
@@ -107,13 +108,11 @@ router.patch('/', (req, res, next) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
             `UPDATE sorteios
-                SET cod_sorteio = ?,
-                    tamanho = ?,
+                SET tamanho = ?,
                     numero_vencedor = ?,
                     data_sorteio = ?
             WHERE id_sorteio = ?`,
             [
-                req.body.cod_sorteio,
                 req.body.tamanho,
                 req.body.numero_vencedor,
                 req.body.data_sorteio,
@@ -126,7 +125,6 @@ router.patch('/', (req, res, next) => {
                     mensagem: 'Sorteio atualizado com sucesso',
                     sorteioAtualizado: {
                         id_sorteio: req.body.id_sorteio,
-                        cod_sorteio: req.body.cod_sorteio,
                         tamanho: req.body.tamanho,
                         numero_vencedor: req.body.numero_vencedor,
                         data_sorteio: req.body.data_sorteio,
@@ -159,7 +157,8 @@ router.delete('/', (req, res, next) => {
                         descricao: 'Insere um sorteios',
                         url: 'http://localhost:3000/sorteios',
                         body: {
-                            cod_sorteio: 'String',
+                            numero_vencedor: 'Number',
+                            data_sorteio: 'Date',
                             tamanho: 'Number'
                         }
                     }

@@ -7,19 +7,23 @@ router.get('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'SELECT * FROM numerovencedor;',
+            'SELECT * FROM apostas;',
             (error, result, fields) => {
                 const response = {
                     quantidade: result.length,
-                    numerovencedor: result.map(n => {
+                    apostas: result.map(n => {
                         return {
-                            id_numVencedor: n.id_numVencedor,
+                            id_aposta: n.id_aposta,
                             numero: n.numero,
-                            id_numvencedor: n.id_numvencedor,
+                            codigo: n.codigo,
+                            id_sorteio: n.id_sorteio,
+                            data_criado: n.data_criado,
+                            celular: n.celular,
+                            data_pagamento: n.data_pagamento,
                             request: {
                                 tipo: 'GET',
-                                descricao: 'Retorna os detalhes de um número vencedor de um sorteio específico',
-                                url: 'http://localhost:3000/numerovencedor/' + n.id_numvencedor
+                                descricao: 'Retorna uma aposta específico',
+                                url: 'http://localhost:3000/apostas/' + n.id_aposta
                             }
                         }
                     })
@@ -36,23 +40,26 @@ router.post('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'INSERT INTO numerovencedor (numero, id_numvencedor) VALUES (?, ?)',
-            [req.body.numero, req.body.id_numvencedor],
+            'INSERT INTO apostas (numero, codigo, id_sorteio, celular) VALUES (?, ?, ?, ?)',
+            [req.body.numero, req.body.codigo, req.body.id_sorteio, req.body.celular],
             (error, resultado, field) => {
                 //para liberar a conexao, se nao ela vai continuar na fila e travar outros acessos
                 conn.release();
                 
                 if (error) { return res.status(500).send({ error: error, response: null }) }
                 const response = {
-                    mensagem: 'Número vencedor inserido com sucesso',
+                    mensagem: 'Aposta inserida com sucesso',
                     numVencedorCriado: {
-                        id_numVencedor: resultado.id_numVencedor,
+                        id_aposta: resultado.id_aposta,
                         numero: req.body.numero,
-                        id_numvencedor: req.body.id_numvencedor,
+                        codigo: req.body.codigo,
+                        id_sorteio: req.body.id_sorteio,
+                        data_criado: req.body.data_criado,
+                        celular: req.body.celular,
                         request: {
                             tipo: 'POST',
-                            descricao: 'Retorna todos os números vencedores dos sorteios',
-                            url: 'http://localhost:3000/numerovencedor'
+                            descricao: 'Retorna todas as apostas',
+                            url: 'http://localhost:3000/apostas'
                         }
                     }
                 }
@@ -63,12 +70,12 @@ router.post('/', (req, res, next) => {
 });
 
 // RETORNA UM NUMERO ESPECIFICO
-router.get('/:id_numVencedor', (req, res, next) => {
+router.get('/:id_aposta', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'SELECT * FROM numerovencedor WHERE id_numVencedor = ?;',
-            [req.params.id_numVencedor],
+            'SELECT * FROM apostas WHERE id_aposta = ?;',
+            [req.params.id_aposta],
             (error, result, fields) => {
                 if (error) { return res.status(500).send({ error: error }) }
 
@@ -77,16 +84,15 @@ router.get('/:id_numVencedor', (req, res, next) => {
                         mensagem: 'Não foi encontrado número vencedor com este ID'
                     })
                 }
-
                 const response = {
-                    numerovencedor: {
-                        id_numVencedor: result[0].id_numVencedor,
+                    apostas: {
                         numero: result[0].numero,
-                        id_numvencedor: result[0].id_numvencedor,
+                        codigo: result[0].codigo,
+                        id_sorteio: result[0].id_sorteio,
                         request: {
                             tipo: 'POST',
                             descricao: 'Retorna um número vencedor especifíco',
-                            url: 'http://localhost:3000/numerovencedor'
+                            url: 'http://localhost:3000/apostas'
                         }
                     }
                 }
@@ -96,65 +102,35 @@ router.get('/:id_numVencedor', (req, res, next) => {
     })
 });
 
-// ALTERA UM NUMERO VENCEDOR
+// ALTERA UM SORTEIOS
 router.patch('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            `UPDATE numerovencedor
-                SET id_sorteio = ?,
-                    numero = ?
-            WHERE id_numVencedor = ?`,
+            `UPDATE apostas
+                SET data_pagamento = ?
+            WHERE id_aposta = ?`,
             [
-                req.body.id_sorteio,
-                req.body.numero,
-                req.body.id_numVencedor
+                req.body.data_pagamento,
+                req.body.id_aposta
             ],
             (error, result, field) => {
                 conn.release();
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    mensagem: 'Número vencedor atualizado com sucesso',
-                    numVencedorAtualizado: {
-                        id_numVencedor: req.body.id_numVencedor,
-                        id_sorteio: req.body.id_sorteio,
+                    mensagem: 'Aposta atualizado com sucesso',
+                    apostaAtualizada: {
                         numero: req.body.numero,
+                        codigo: req.body.codigo,
+                        id_sorteio: req.body.id_sorteio,
                         request: {
                             tipo: 'GET',
-                            descricao: 'Retorna os detalhes de um número vencedor específico',
-                            url: 'http://localhost:3000/numerovencedor/' + req.body.id_numVencedor
+                            descricao: 'Retorna os detalhes de um sorteios específico',
+                            url: 'http://localhost:3000/apostas/' + req.body.id_aposta
                         }
                     }
                 }
                 return res.status(201).send(response)
-            }
-        )
-    });
-});
-
-// EXCLUI UM NUMERO VENCEDOR
-router.delete('/', (req, res, next) => {
-    mysql.getConnection((error, conn) => {
-        if (error) { return res.status(500).send({ error: error }) }
-        conn.query(
-            `DELETE FROM numerovencedor WHERE id_numvencedor = ?`,
-            [req.body.id_numvencedor],
-            (error, result, field) => {
-                conn.release();
-                if (error) { return res.status(500).send({ error: error }) }
-                const response = {
-                    mensagem: 'Número vencedor removido com sucesso',
-                    request: {
-                        tipo: 'POST',
-                        descricao: 'Insere um Número vencedor',
-                        url: 'http://localhost:3000/numerovencedor',
-                        body: {
-                            id_sorteio: 'String',
-                            numero: 'Number'
-                        }
-                    }
-                }
-                return res.status(202).send(response)
             }
         )
     });

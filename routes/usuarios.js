@@ -66,7 +66,6 @@ router.post('/', (req, res, next) => {
     });
 });
 
-//PARADA
 // RETORNA UM USUARIOS ESPECIFICO
 router.get('/:id_usuario', (req, res, next) => {
     mysql.getConnection((error, conn) => {
@@ -111,13 +110,12 @@ router.patch('/', (req, res, next) => {
         conn.query(
             `UPDATE usuarios
                 SET email     = ?,
-                    tamanho    = ?
+                    fone    = ?,
+                    senha = ?,
+                    permissao = ?
             WHERE id_usuario = ?`,
-            [
-                req.body.email,
-                req.body.tamanho,
-                req.body.id_usuario
-            ],
+            [req.body.email, req.body.fone, req.body.senha, req.body.permissao, req.body.id_usuario],
+            
             (error, result, field) => {
                 conn.release();
                 if (error) { return res.status(500).send({ error: error }) }
@@ -126,10 +124,12 @@ router.patch('/', (req, res, next) => {
                     sorteioAtualizado: {
                         id_usuario: req.body.id_usuario,
                         email: req.body.email,
-                        tamanho: req.body.tamanho,
+                        fone: req.body.fone,
+                        senha: req.body.senha,
+                        permissao: req.body.permissao,
                         request: {
                             tipo: 'GET',
-                            descricao: 'Retorna os detalhes de um usuarios específico',
+                            descricao: 'Retorna os detalhes de um usuario específico',
                             url: 'http://localhost:3000/usuarios/' + req.body.id_usuario
                         }
                     }
@@ -150,7 +150,7 @@ router.delete('/', (req, res, next) => {
                 conn.release();
                 if (error) { return res.status(500).send({ error: error }) }
                 const response = {
-                    mensagem: 'Sorteio removido com sucesso',
+                    mensagem: 'Usuário removido com sucesso',
                     request: {
                         tipo: 'POST',
                         descricao: 'Insere um usuarios',

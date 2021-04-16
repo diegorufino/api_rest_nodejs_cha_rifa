@@ -3,7 +3,7 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser')
 
-const rotaNumeroVencedor = require('./routes/numerovencedor')
+const rotaApostas = require('./routes/apostas')
 const rotaSorteios = require('./routes/sorteios')
 const rotaUsuarios = require('./routes/usuarios')
 
@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 })
 
 // ROTA
-app.use('/numerovencedor', rotaNumeroVencedor)
+app.use('/apostas', rotaApostas)
 app.use('/sorteios', rotaSorteios)
 app.use('/usuarios', rotaUsuarios)
 
