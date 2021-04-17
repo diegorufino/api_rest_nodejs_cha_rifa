@@ -1,11 +1,13 @@
 const express = require('express');
 const app = express();
+const cors = require('cors')
 const morgan = require('morgan');
 const bodyParser = require('body-parser')
 
 const rotaApostas = require('./routes/apostas')
 const rotaSorteios = require('./routes/sorteios')
-const rotaUsuarios = require('./routes/usuarios')
+const rotaUsuarios = require('./routes/usuarios');
+const { use } = require('./routes/apostas');
 
 //morgan - monitora todas as acoes mostrando no log
 app.use(morgan('dev'))
@@ -14,19 +16,9 @@ app.use(bodyParser.json()) //json de entrada no body
 
 //CORS
 app.use((req, res, next) => {
-    // origem (url/site especifico) que ele permite que o acesse
     res.header('Access-Control-Allow-Origin', '*'); 
-    // quais os cabecalhos que serao aceitos
-    res.header(
-        'Access-Control-Allow-Origin', 
-        'Origin, X-Requrested-With, Content-Type, Accept, Authorization'
-        // X-Requrested-With
-    );
-    // quais os metodos que poderao ser retornados
-    if(req.method === 'OPTIONS'){
-        res.header('Access-Control-Allow-Origin', 'PUT, POST, PATCH, DELETE, GET');
-        return res.status(200).send({});        
-    }
+    res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
+    app.use(cors())
     next();
 })
 
