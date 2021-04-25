@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('../mysql').pool;
 
-// RETORNA TODOS OS PEDIDOS
+// RETORNA TODOS AS APOSTAS
 router.get('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
@@ -18,6 +18,7 @@ router.get('/', (req, res, next) => {
                             codigo: n.codigo,
                             id_sorteio: n.id_sorteio,
                             data_criado: n.data_criado,
+                            nome: n.nome,
                             celular: n.celular,
                             data_pagamento: n.data_pagamento,
                             request: {
@@ -40,8 +41,8 @@ router.post('/', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
         conn.query(
-            'INSERT INTO apostas (numero, codigo, id_sorteio, celular) VALUES (?, ?, ?, ?)',
-            [req.body.numero, req.body.codigo, req.body.id_sorteio, req.body.celular],
+            'INSERT INTO apostas (numero, codigo, id_sorteio, nome, celular) VALUES (?, ?, ?, ?, ?)',
+            [req.body.numero, req.body.codigo, req.body.id_sorteio, req.body.nome, req.body.celular],
             (error, resultado, field) => {
                 //para liberar a conexao, se nao ela vai continuar na fila e travar outros acessos
                 conn.release();
@@ -55,6 +56,7 @@ router.post('/', (req, res, next) => {
                         codigo: req.body.codigo,
                         id_sorteio: req.body.id_sorteio,
                         data_criado: req.body.data_criado,
+                        nome: req.body.nome,
                         celular: req.body.celular,
                         request: {
                             tipo: 'POST',
@@ -69,7 +71,7 @@ router.post('/', (req, res, next) => {
     });
 });
 
-// RETORNA UM NUMERO ESPECIFICO
+// RETORNA UMA APOSTA ESPECIFICO
 router.get('/:id_aposta', (req, res, next) => {
     mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }) }
@@ -86,9 +88,13 @@ router.get('/:id_aposta', (req, res, next) => {
                 }
                 const response = {
                     apostas: {
+                        id_aposta: result[0].id_aposta,
+                        nome: result[0].nome,
+                        celular: result[0].celular,
                         numero: result[0].numero,
                         codigo: result[0].codigo,
                         id_sorteio: result[0].id_sorteio,
+                        data_criado: result[0].data_criado,
                         request: {
                             tipo: 'POST',
                             descricao: 'Retorna um número vencedor especifíco',
@@ -120,9 +126,13 @@ router.patch('/', (req, res, next) => {
                 const response = {
                     mensagem: 'Aposta atualizado com sucesso',
                     apostaAtualizada: {
+                        id_aposta: resultado.id_aposta,
                         numero: req.body.numero,
                         codigo: req.body.codigo,
                         id_sorteio: req.body.id_sorteio,
+                        data_criado: req.body.data_criado,
+                        nome: req.body.nome,
+                        celular: req.body.celular,
                         request: {
                             tipo: 'GET',
                             descricao: 'Retorna os detalhes de um sorteios específico',
